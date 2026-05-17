@@ -12,6 +12,12 @@ The system uses normal controller inputs and video capture only:
 
 Safety rule: `shiny` and `uncertain` both stop the automation.
 
+## System Wiring
+
+![Pixel-art wiring diagram showing one Switch 2 dock, HDMI capture passthrough, Windows PC, Arduino Nano, and Arduino Micro](docs/assets/shiny-starter-wiring-pixel-diagram.png)
+
+See [docs/wiring.md](docs/wiring.md) for the pin-by-pin wiring table and Mermaid diagram.
+
 ## Current Status
 
 Implemented:
@@ -76,4 +82,3 @@ Dry-run the loop without serial hardware:
 ```powershell
 python scripts\shiny-hunt.py run --calibration calibration\charmander.json --camera-index 0 --dry-run --max-attempts 3
 ```
-
