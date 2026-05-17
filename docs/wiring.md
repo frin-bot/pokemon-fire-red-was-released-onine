@@ -2,6 +2,8 @@
 
 ## Complete System Diagram
 
+![Pixel-art wiring diagram showing one Switch 2 dock, HDMI capture passthrough, Windows PC, Arduino Nano, and Arduino Micro](assets/shiny-starter-wiring-pixel-diagram.png)
+
 ```mermaid
 flowchart LR
     subgraph switch_side["Switch 2 side"]
