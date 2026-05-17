@@ -41,11 +41,11 @@ Recommended wiring:
 
 - Nano USB connects to Windows.
 - Micro USB connects to the Switch 2 dock.
-- Nano `TX` connects to Micro `RX1`.
-- Nano `RX` connects to Micro `TX1`.
+- Nano `D11` connects to Micro `RX1` / `D0`.
+- Nano `D10` connects to Micro `TX1` / `D1`.
 - Nano `GND` connects to Micro `GND`.
 
-The exact Arduino board pin labels must be confirmed before wiring because clone boards sometimes label serial pins differently.
+The Nano uses `SoftwareSerial` on D10/D11 because the Nano hardware UART is shared with the USB serial chip. The exact Arduino board pin labels must still be confirmed before wiring because clone boards sometimes label serial pins differently.
 
 ## Software Components
 

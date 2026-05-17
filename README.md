@@ -1,0 +1,79 @@
+# Pokemon FireRed Shiny Starter Automation
+
+This repo contains a first-pass fully unattended shiny starter hunting system for the Nintendo Switch release of Pokemon FireRed.
+
+The system uses normal controller inputs and video capture only:
+
+- Windows reads the USB HDMI capture feed.
+- Python/OpenCV classifies the starter as `non_shiny`, `shiny`, or `uncertain`.
+- The attempt counter is saved after every evaluated attempt.
+- The Arduino Nano relays serial commands from Windows.
+- The Arduino Micro sends Switch-compatible controller inputs.
+
+Safety rule: `shiny` and `uncertain` both stop the automation.
+
+## Current Status
+
+Implemented:
+
+- Python detector core.
+- Calibration JSON helpers.
+- Attempt logging to JSON/CSV.
+- Dry-run serial command recording.
+- CLI entrypoint.
+- Arduino Nano serial bridge sketch.
+- Arduino Micro controller sketch.
+- Wiring and setup docs.
+
+Still needs physical calibration and timing adjustment on the real Switch/capture-card setup.
+
+## Important Files
+
+- `docs/setup.md`: end-to-end setup instructions.
+- `docs/wiring.md`: pin-by-pin wiring instructions.
+- `arduino/nano_bridge/nano_bridge.ino`: Nano bridge sketch.
+- `arduino/micro_controller/micro_controller.ino`: Micro controller sketch.
+- `scripts/shiny-hunt.py`: Windows CLI entrypoint.
+- `shiny_hunter/`: Python package.
+- `tests/`: Python unit tests.
+
+## Run Tests
+
+```powershell
+python -B -m unittest discover -s tests -v
+```
+
+## Python Dependencies
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+## First CLI Checks
+
+List capture devices:
+
+```powershell
+python scripts\shiny-hunt.py list-cameras
+```
+
+Create a calibration from a saved normal-starter screenshot:
+
+```powershell
+python scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image normal.png --crop 100,100,80,80 --output calibration\charmander.json
+```
+
+Classify a screenshot:
+
+```powershell
+python scripts\shiny-hunt.py classify-image --calibration calibration\charmander.json --image check.png
+```
+
+Dry-run the loop without serial hardware:
+
+```powershell
+python scripts\shiny-hunt.py run --calibration calibration\charmander.json --camera-index 0 --dry-run --max-attempts 3
+```
+
