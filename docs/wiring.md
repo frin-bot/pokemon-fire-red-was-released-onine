@@ -1,5 +1,53 @@
 # Wiring Guide
 
+## Complete System Diagram
+
+```mermaid
+flowchart LR
+    subgraph switch_side["Switch 2 side"]
+        switch["Nintendo Switch 2 dock\nPokemon FireRed running"]
+        tv["TV or monitor\noptional passthrough display"]
+    end
+
+    subgraph capture_side["Video capture path"]
+        card["USB HDMI capture card\nUVC, 1080p30/60, HDMI passthrough"]
+    end
+
+    subgraph pc_side["Windows PC"]
+        pc["Windows laptop/desktop\nPython + OpenCV + pyserial"]
+        logs["Run logs\nattempts.csv\ncurrent-run.json\nshiny screenshots"]
+    end
+
+    subgraph arduino_side["Controller automation path"]
+        nano["Arduino Nano V3.0\nUSB serial bridge"]
+        micro["Arduino Micro\nSwitch controller emulator"]
+    end
+
+    switch -- "HDMI out" --> card
+    card -- "HDMI passthrough out" --> tv
+    card -- "USB video capture" --> pc
+
+    pc -- "USB serial commands\nSTART / RESET / STOP" --> nano
+    nano -- "D11 TX -> RX1/D0" --> micro
+    micro -- "TX1/D1 -> D10 RX" --> nano
+    nano --- common_ground["Shared GND"]
+    micro --- common_ground
+
+    micro -- "USB controller input" --> switch
+    pc --> logs
+```
+
+Signal summary:
+
+- Switch dock HDMI out goes into the capture card HDMI input.
+- Capture card HDMI passthrough out goes to the TV or monitor.
+- Capture card USB goes to the Windows PC for OpenCV frame capture.
+- Windows PC USB goes to the Arduino Nano for serial commands.
+- Nano D11 sends commands to Micro RX1/D0.
+- Micro TX1/D1 sends optional status back to Nano D10.
+- Nano GND and Micro GND must be connected.
+- Arduino Micro USB goes to the Switch dock and acts as the controller.
+
 ## Devices
 
 - Arduino Nano V3.0: plugs into the Windows computer over USB.
@@ -47,4 +95,3 @@ If there is no response:
 ## Why The Nano Is Needed
 
 The Micro's USB port is used as the Switch controller connection. The Nano gives the Windows script a separate serial path into the Micro so the PC can tell it when to start, reset, or stop.
-
