@@ -51,6 +51,8 @@ Upload order:
 2. Upload `arduino/micro_controller/micro_controller.ino` to the Arduino Micro.
 3. Wire the boards according to `docs/wiring.md`.
 4. Test `PING` through the Nano at `57600` baud.
+5. Enable wired controller input on the Switch under **System Settings > Controllers and Sensors > Pro Controller Wired Communication**.
+6. With the Micro USB plugged into the Switch dock, use the Nano Serial Monitor to send `A`, `B`, `HOME`, `UP`, `DOWN`, `LEFT`, or `RIGHT`. The Micro should reply with `TAPPED ...`, and the Switch should visibly react to the matching single input.
 
 If Arduino reports `multiple definition of pushButton`, `multiple definition of CustomHID`, or similar linker errors, the library is being compiled twice. Check the `arduino/micro_controller/` folder and remove any copied library folders/files such as `src/`, `examples/`, `library.properties`, `LICENSE`, or a library `README.md`. The Micro sketch folder should contain only `micro_controller.ino`; the library should live under the Arduino libraries folder, usually `Documents\Arduino\libraries\NintendoSwitchControlLibrary`.
 

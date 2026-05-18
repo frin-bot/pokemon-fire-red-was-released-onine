@@ -48,6 +48,10 @@ void handleCommand(String command) {
     return;
   }
 
+  if (handleDiagnosticCommand(command)) {
+    return;
+  }
+
   if (command.startsWith("start ")) {
     stopRequested = false;
     String starter = command.substring(6);
@@ -70,6 +74,52 @@ void handleCommand(String command) {
   }
 
   sendStatus("ERR UNKNOWN_COMMAND");
+}
+
+bool handleDiagnosticCommand(String command) {
+  if (command == "a") {
+    tapDiagnosticButton(Button::A, "TAPPED A");
+    return true;
+  }
+  if (command == "b") {
+    tapDiagnosticButton(Button::B, "TAPPED B");
+    return true;
+  }
+  if (command == "home") {
+    tapDiagnosticButton(Button::HOME, "TAPPED HOME");
+    return true;
+  }
+  if (command == "up") {
+    tapDiagnosticHat(Hat::UP, "TAPPED UP");
+    return true;
+  }
+  if (command == "down") {
+    tapDiagnosticHat(Hat::DOWN, "TAPPED DOWN");
+    return true;
+  }
+  if (command == "left") {
+    tapDiagnosticHat(Hat::LEFT, "TAPPED LEFT");
+    return true;
+  }
+  if (command == "right") {
+    tapDiagnosticHat(Hat::RIGHT, "TAPPED RIGHT");
+    return true;
+  }
+  return false;
+}
+
+void tapDiagnosticButton(uint16_t button, const char* status) {
+  stopRequested = false;
+  pushButton(button);
+  waitInterruptible(300);
+  sendStatus(status);
+}
+
+void tapDiagnosticHat(uint8_t hat, const char* status) {
+  stopRequested = false;
+  pushHat(hat);
+  waitInterruptible(300);
+  sendStatus(status);
 }
 
 void runStarterAttempt(String starter) {
@@ -166,4 +216,3 @@ void pollStopCommand() {
 void sendStatus(const char* message) {
   Serial1.println(message);
 }
-
