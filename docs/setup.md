@@ -43,12 +43,16 @@ Install the Switch controller library:
 - `NintendoSwitchControlLibrary`
 - Source: https://github.com/lefmarna/NintendoSwitchControlLibrary
 
+Install it through Arduino IDE with **Sketch > Include Library > Add .ZIP Library...**. Do not extract or copy the library files into `arduino/micro_controller/`.
+
 Upload order:
 
 1. Upload `arduino/nano_bridge/nano_bridge.ino` to the Arduino Nano.
 2. Upload `arduino/micro_controller/micro_controller.ino` to the Arduino Micro.
 3. Wire the boards according to `docs/wiring.md`.
 4. Test `PING` through the Nano at `57600` baud.
+
+If Arduino reports `multiple definition of pushButton`, `multiple definition of CustomHID`, or similar linker errors, the library is being compiled twice. Check the `arduino/micro_controller/` folder and remove any copied library folders/files such as `src/`, `examples/`, `library.properties`, `LICENSE`, or a library `README.md`. The Micro sketch folder should contain only `micro_controller.ino`; the library should live under the Arduino libraries folder, usually `Documents\Arduino\libraries\NintendoSwitchControlLibrary`.
 
 ## 4. Switch Prep
 
@@ -125,4 +129,3 @@ The Micro sketch includes starter-selection and soft-reset timing constants insi
 - `softResetToSave`
 
 The first real hardware session should be supervised. Adjust delays until the Micro reliably reaches the same check frame every attempt.
-
