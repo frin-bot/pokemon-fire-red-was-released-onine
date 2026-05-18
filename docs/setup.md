@@ -45,6 +45,23 @@ Install the Switch controller library:
 
 Install it through Arduino IDE with **Sketch > Include Library > Add .ZIP Library...**. Do not extract or copy the library files into `arduino/micro_controller/`.
 
+For Switch input to work, the Arduino Micro must compile with a Switch-compatible USB VID/PID. On this Windows setup with Arduino IDE 2.x and Arduino AVR Boards 1.8.7, edit:
+
+```text
+C:\Users\efrai\AppData\Local\Arduino15\packages\arduino\hardware\avr\1.8.7\boards.txt
+```
+
+In the `micro` section, change these lines:
+
+```text
+micro.vid.1=0x0f0d
+micro.pid.1=0x0092
+micro.build.vid=0x0f0d
+micro.build.pid=0x0092
+```
+
+Restart Arduino IDE after editing `boards.txt`, then re-upload `micro_controller.ino`. Do not change the `micro.upload_port.*` lines; those are used for finding the bootloader/upload port.
+
 Upload order:
 
 1. Upload `arduino/nano_bridge/nano_bridge.ino` to the Arduino Nano.
