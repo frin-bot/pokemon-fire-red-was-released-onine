@@ -2,13 +2,17 @@
 
 const long BAUD_RATE = 57600;
 const unsigned long SERIAL_POLL_MS = 10;
+const int LED_PIN = 17;
 
 String inputLine = "";
 bool stopRequested = true;
 
 void setup() {
   Serial1.begin(BAUD_RATE);
+  pinMode(LED_PIN, OUTPUT);
   delay(3000);
+  registerControllerWithSwitch();
+  blinkReadyLed();
   sendStatus("READY");
 }
 
@@ -74,6 +78,21 @@ void handleCommand(String command) {
   }
 
   sendStatus("ERR UNKNOWN_COMMAND");
+}
+
+void registerControllerWithSwitch() {
+  // The Switch often needs early reports before it accepts the USB HID controller.
+  pushButton(Button::B, 500, 5);
+  delay(500);
+}
+
+void blinkReadyLed() {
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(LED_PIN, LOW);
+    delay(200);
+    digitalWrite(LED_PIN, HIGH);
+    delay(200);
+  }
 }
 
 bool handleDiagnosticCommand(String command) {
