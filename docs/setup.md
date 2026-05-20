@@ -58,6 +58,8 @@ micro.vid.1=0x0f0d
 micro.pid.1=0x0092
 micro.build.vid=0x0f0d
 micro.build.pid=0x0092
+micro.build.usb_manufacturer="HORI CO.,LTD."
+micro.build.usb_product="POKKEN CONTROLLER"
 ```
 
 Restart Arduino IDE after editing `boards.txt`, then re-upload `micro_controller.ino`. Do not change the `micro.upload_port.*` lines; those are used for finding the bootloader/upload port.
@@ -69,9 +71,13 @@ Upload order:
 3. Wire the boards according to `docs/wiring.md`.
 4. Test `PING` through the Nano at `57600` baud.
 5. Enable wired controller input on the Switch under **System Settings > Controllers and Sensors > Pro Controller Wired Communication**.
-6. With the Micro USB plugged into the Switch dock, use the Nano Serial Monitor to send `A`, `B`, `HOME`, `UP`, `DOWN`, `LEFT`, or `RIGHT`. The Micro should reply with `TAPPED ...`, and the Switch should visibly react to the matching single input.
+6. Open **Controllers > Change Grip/Order** on the Switch.
+7. With the Micro USB plugged into the Switch dock, use the Nano Serial Monitor to send `PAIR`. The Micro should reply with `TAPPED L+R`. This sends repeated L+R reports, which is the cleanest registration test for the controller-order screen.
+8. After `PAIR`, send `A`, `B`, `HOME`, `PLUS`, `MINUS`, `UP`, `DOWN`, `LEFT`, or `RIGHT`. The Micro should reply with `TAPPED ...`, and the Switch should visibly react to the matching single input.
 
-The Micro sketch sends `pushButton(Button::B, 500, 5)` during `setup()` before it prints `READY`. This mirrors the library example pattern and gives the Switch early button reports so it can register the USB controller after the Micro is plugged in.
+The Micro sketch sends `pushButton(Button::B, 500, 5)` and repeated L+R reports during `setup()` before it prints `READY`. This mirrors the library example pattern and gives the Switch early button reports so it can register the USB controller after the Micro is plugged in.
+
+The sketch also initializes the Switch controller library before Arduino's USB attach step. Without that early initialization, Windows may show the Micro as `VID_0F0D&PID_0092` with only a serial interface and no gamepad HID interface.
 
 If Arduino reports `multiple definition of pushButton`, `multiple definition of CustomHID`, or similar linker errors, the library is being compiled twice. Check the `arduino/micro_controller/` folder and remove any copied library folders/files such as `src/`, `examples/`, `library.properties`, `LICENSE`, or a library `README.md`. The Micro sketch folder should contain only `micro_controller.ino`; the library should live under the Arduino libraries folder, usually `Documents\Arduino\libraries\NintendoSwitchControlLibrary`.
 

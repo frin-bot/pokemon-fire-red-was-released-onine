@@ -7,6 +7,16 @@ const int LED_PIN = 17;
 String inputLine = "";
 bool stopRequested = true;
 
+namespace {
+struct SwitchControllerUsbDescriptorInitializer {
+  SwitchControllerUsbDescriptorInitializer() {
+    SwitchControlLibrary();
+  }
+};
+
+SwitchControllerUsbDescriptorInitializer switchControllerUsbDescriptorInitializer;
+}
+
 void setup() {
   Serial1.begin(BAUD_RATE);
   pinMode(LED_PIN, OUTPUT);
@@ -83,6 +93,7 @@ void handleCommand(String command) {
 void registerControllerWithSwitch() {
   // The Switch often needs early reports before it accepts the USB HID controller.
   pushButton(Button::B, 500, 5);
+  pressPairCombo(8, 250);
   delay(500);
 }
 
@@ -96,6 +107,11 @@ void blinkReadyLed() {
 }
 
 bool handleDiagnosticCommand(String command) {
+  if (command == "pair" || command == "lr") {
+    pressPairCombo(10, 300);
+    sendStatus("TAPPED L+R");
+    return true;
+  }
   if (command == "a") {
     tapDiagnosticButton(Button::A, "TAPPED A");
     return true;
@@ -106,6 +122,14 @@ bool handleDiagnosticCommand(String command) {
   }
   if (command == "home") {
     tapDiagnosticButton(Button::HOME, "TAPPED HOME");
+    return true;
+  }
+  if (command == "plus") {
+    tapDiagnosticButton(Button::PLUS, "TAPPED PLUS");
+    return true;
+  }
+  if (command == "minus") {
+    tapDiagnosticButton(Button::MINUS, "TAPPED MINUS");
     return true;
   }
   if (command == "up") {
@@ -125,6 +149,19 @@ bool handleDiagnosticCommand(String command) {
     return true;
   }
   return false;
+}
+
+void pressPairCombo(int count, unsigned long afterMs) {
+  for (int i = 0; i < count; i++) {
+    SwitchControlLibrary().pressButton(Button::L);
+    SwitchControlLibrary().pressButton(Button::R);
+    SwitchControlLibrary().sendReport();
+    delay(80);
+    SwitchControlLibrary().releaseButton(Button::L);
+    SwitchControlLibrary().releaseButton(Button::R);
+    SwitchControlLibrary().sendReport();
+    delay(afterMs);
+  }
 }
 
 void tapDiagnosticButton(uint16_t button, const char* status) {
