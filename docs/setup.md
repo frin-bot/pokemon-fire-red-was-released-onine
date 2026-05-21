@@ -30,7 +30,6 @@ python -B -m unittest discover -s tests -v
 Expected test result:
 
 ```text
-Ran 8 tests
 OK
 ```
 
@@ -101,25 +100,38 @@ If Arduino reports `multiple definition of pushButton`, `multiple definition of 
 With the capture card attached:
 
 ```powershell
-python scripts\shiny-hunt.py list-cameras
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py list-cameras --backend any
 ```
 
-Use the reported camera index in later commands.
+Use the reported camera index in later commands. If Windows shows the capture card in Device Manager but this command only finds the built-in webcam, try the other OpenCV backends:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py list-cameras --backend msmf
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py list-cameras --backend dshow
+```
+
+If the UGREEN capture card opens but does not produce frames, check the physical HDMI signal path before changing software: Switch dock HDMI out to capture-card HDMI in, capture-card pass-through HDMI out to the display if used, Switch awake/docked, and no other app already using the capture card.
 
 ## 6. Calibration
 
-Capture or save a screenshot where the normal starter check/battle frame is visible. Choose a crop rectangle around the sprite region with visible color differences.
+Capture a screenshot where the normal starter summary sprite is visible. Use the capture-card index reported by `list-cameras`; the examples below use `1`, but replace it with your actual capture-card index.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py capture-frame --backend any --camera-index 1 --output calibration\starter-normal.png
+```
+
+Open `calibration\starter-normal.png` and choose a crop rectangle around the sprite region with visible color differences. The rectangle format is `x,y,width,height`.
 
 Example:
 
 ```powershell
-python scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image normal.png --crop 100,100,80,80 --output calibration\charmander.json
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image calibration\starter-normal.png --crop 100,100,80,80 --output calibration\charmander.json
 ```
 
 If you also have a known shiny reference image:
 
 ```powershell
-python scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image normal.png --shiny-image shiny.png --crop 100,100,80,80 --output calibration\charmander.json
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image calibration\starter-normal.png --shiny-image calibration\starter-shiny.png --crop 100,100,80,80 --output calibration\charmander.json
 ```
 
 Without a shiny reference, the app will classify close matches as `non_shiny` and far matches as `uncertain`. That is still safe because uncertain stops the bot.
@@ -129,7 +141,7 @@ Without a shiny reference, the app will classify close matches as `non_shiny` an
 Dry-run mode reads the capture feed and records attempts without sending hardware serial commands:
 
 ```powershell
-python scripts\shiny-hunt.py run --calibration calibration\charmander.json --camera-index 0 --dry-run --max-attempts 3
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 1 --dry-run --max-attempts 3
 ```
 
 Check:
@@ -143,7 +155,7 @@ Check:
 After dry-run behavior looks correct:
 
 ```powershell
-python scripts\shiny-hunt.py run --calibration calibration\charmander.json --camera-index 0 --serial-port COM3
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 1 --serial-port COM3
 ```
 
 Replace `COM3` with the Nano's Windows COM port.

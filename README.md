@@ -62,23 +62,31 @@ python -m pip install -r requirements.txt
 List capture devices:
 
 ```powershell
-python scripts\shiny-hunt.py list-cameras
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py list-cameras --backend any
 ```
+
+Save a calibration frame from the capture card:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py capture-frame --backend any --camera-index 1 --output calibration\starter-normal.png
+```
+
+Replace `1` with the capture-card index reported by `list-cameras`.
 
 Create a calibration from a saved normal-starter screenshot:
 
 ```powershell
-python scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image normal.png --crop 100,100,80,80 --output calibration\charmander.json
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image calibration\starter-normal.png --crop 100,100,80,80 --output calibration\charmander.json
 ```
 
 Classify a screenshot:
 
 ```powershell
-python scripts\shiny-hunt.py classify-image --calibration calibration\charmander.json --image check.png
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py classify-image --calibration calibration\charmander.json --image calibration\starter-normal.png
 ```
 
 Dry-run the loop without serial hardware:
 
 ```powershell
-python scripts\shiny-hunt.py run --calibration calibration\charmander.json --camera-index 0 --dry-run --max-attempts 3
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 1 --dry-run --max-attempts 3
 ```

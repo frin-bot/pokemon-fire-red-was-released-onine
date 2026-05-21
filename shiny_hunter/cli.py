@@ -73,11 +73,20 @@ def _build_parser() -> argparse.ArgumentParser:
     classify.set_defaults(func=_cmd_classify_image)
 
     cameras = subparsers.add_parser("list-cameras", help="Print OpenCV camera indices that produce frames.")
+    cameras.add_argument("--backend", choices=["any", "dshow", "msmf"], default="any")
     cameras.add_argument("--max-index", type=int, default=8)
     cameras.set_defaults(func=_cmd_list_cameras)
 
+    capture_frame = subparsers.add_parser("capture-frame", help="Save one frame from a capture device.")
+    capture_frame.add_argument("--backend", choices=["any", "dshow", "msmf"], default="any")
+    capture_frame.add_argument("--camera-index", type=int, default=0)
+    capture_frame.add_argument("--output", required=True, type=Path)
+    capture_frame.add_argument("--warmup-frames", type=int, default=5)
+    capture_frame.set_defaults(func=_cmd_capture_frame)
+
     run = subparsers.add_parser("run", help="Run the hunt loop with capture-card feedback.")
     run.add_argument("--calibration", required=True, type=Path)
+    run.add_argument("--backend", choices=["any", "dshow", "msmf"], default="any")
     run.add_argument("--camera-index", type=int, default=0)
     run.add_argument("--run-dir", type=Path, default=Path("runs/current"))
     run.add_argument("--serial-port")
@@ -124,9 +133,10 @@ def _cmd_classify_image(args: argparse.Namespace) -> int:
 
 def _cmd_list_cameras(args: argparse.Namespace) -> int:
     cv2 = _import_cv2()
+    backend_api = _capture_backend_api(cv2, args.backend)
     found = []
     for index in range(args.max_index + 1):
-        capture = cv2.VideoCapture(index, cv2.CAP_DSHOW)
+        capture = cv2.VideoCapture(index, backend_api)
         ok, _frame = capture.read()
         capture.release()
         if ok:
@@ -138,12 +148,30 @@ def _cmd_list_cameras(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_capture_frame(args: argparse.Namespace) -> int:
+    cv2 = _import_cv2()
+    capture = cv2.VideoCapture(args.camera_index, _capture_backend_api(cv2, args.backend))
+
+    if not capture.isOpened():
+        raise RuntimeError(f"could not open camera index {args.camera_index}")
+
+    try:
+        frame_bgr = _read_capture_frame(capture, warmup_frames=args.warmup_frames)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        if not cv2.imwrite(str(args.output), frame_bgr):
+            raise RuntimeError(f"could not write frame to {args.output}")
+        print(f"Wrote frame to {args.output}")
+        return 0
+    finally:
+        capture.release()
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     cv2 = _import_cv2()
     calibration = load_calibration(args.calibration)
     logger = RunLogger(args.run_dir, starter=calibration.starter)
     link = DryRunControllerLink() if args.dry_run else _serial_link_from_args(args)
-    capture = cv2.VideoCapture(args.camera_index, cv2.CAP_DSHOW)
+    capture = cv2.VideoCapture(args.camera_index, _capture_backend_api(cv2, args.backend))
 
     if not capture.isOpened():
         raise RuntimeError(f"could not open camera index {args.camera_index}")
@@ -190,6 +218,23 @@ def _serial_link_from_args(args: argparse.Namespace) -> SerialControllerLink:
     if not args.serial_port:
         raise ValueError("--serial-port is required unless --dry-run is set")
     return SerialControllerLink(args.serial_port, baud_rate=args.baud_rate)
+
+
+def _capture_backend_api(cv2, backend: str) -> int:
+    return {
+        "any": cv2.CAP_ANY,
+        "dshow": cv2.CAP_DSHOW,
+        "msmf": cv2.CAP_MSMF,
+    }[backend]
+
+
+def _read_capture_frame(capture, warmup_frames: int):
+    frame_bgr = None
+    for _ in range(max(0, warmup_frames) + 1):
+        ok, frame_bgr = capture.read()
+        if not ok:
+            raise RuntimeError("capture card did not produce a frame")
+    return frame_bgr
 
 
 def _read_image_rgb(path: Path):
