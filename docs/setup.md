@@ -79,6 +79,8 @@ The Micro sketch sends `pushButton(Button::B, 500, 5)` and repeated L+R reports 
 
 The sketch also initializes the Switch controller library before Arduino's USB attach step. Without that early initialization, Windows may show the Micro as `VID_0F0D&PID_0092` with only a serial interface and no gamepad HID interface.
 
+The starter attempt intentionally switches from `A` to repeated `B` presses before the nickname prompt. This avoids accepting the prompt and typing a nickname if timing runs slightly fast.
+
 If Arduino reports `multiple definition of pushButton`, `multiple definition of CustomHID`, or similar linker errors, the library is being compiled twice. Check the `arduino/micro_controller/` folder and remove any copied library folders/files such as `src/`, `examples/`, `library.properties`, `LICENSE`, or a library `README.md`. The Micro sketch folder should contain only `micro_controller.ino`; the library should live under the Arduino libraries folder, usually `Documents\Arduino\libraries\NintendoSwitchControlLibrary`.
 
 ## 4. Switch Prep

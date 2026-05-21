@@ -185,8 +185,8 @@ void runStarterAttempt(String starter) {
   tap(Button::A, 900);       // Inspect the ball.
   tap(Button::A, 700, 4);    // Advance Oak's text.
   tap(Button::A, 1000);      // Confirm the starter choice when Yes is selected.
-  tap(Button::A, 700, 8);    // Receive the Pokemon and reach nickname prompt.
-  tap(Button::B, 900);       // Decline nickname when possible.
+  tap(Button::A, 650, 2);    // Advance receive text without accepting nickname.
+  tap(Button::B, 650, 6);    // Advance remaining text and decline nickname prompt.
   tap(Button::A, 700, 16);   // Advance rival dialogue and battle intro.
 
   // This pause leaves the battle/send-out frames stable for the capture script.
