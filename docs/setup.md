@@ -155,6 +155,8 @@ The app stops when:
 - The capture feed fails.
 - Serial setup fails.
 
+When the frame is classified as `non_shiny`, the app records the attempt, sends `RESET`, waits for the game to return to the save, and starts the next attempt. This is the normal unattended shiny-hunt loop: check first, soft reset only after confirming the starter is not shiny, then try again.
+
 ## 9. Timing Adjustment
 
 The Micro sketch includes starter-selection and soft-reset timing constants inside these routines:
