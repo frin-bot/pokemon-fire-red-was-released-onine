@@ -198,10 +198,16 @@ void runStarterAttempt(String starter) {
   tap(Button::A, 1000);      // Confirm the starter choice when Yes is selected.
   tap(Button::A, 650, 2);    // Advance receive text without accepting nickname.
   tap(Button::B, 650, 6);    // Advance remaining text and decline nickname prompt.
+  clearRivalStarterDialogueBeforeCheck();
   openStarterSummaryForCheck();
 
   // This pause leaves the summary sprite stable for the capture script.
   waitInterruptible(3000);
+}
+
+void clearRivalStarterDialogueBeforeCheck() {
+  tap(Button::B, 700, 8);    // Clear rival starter-selection text without choosing prompts.
+  waitInterruptible(800);    // Let player control/menu availability settle.
 }
 
 void openStarterSummaryForCheck() {

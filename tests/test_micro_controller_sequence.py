@@ -14,15 +14,26 @@ class MicroControllerSequenceTests(unittest.TestCase):
         body = match.group("body")
         receive_text = "tap(Button::A, 650, 2);"
         decline_nickname = "tap(Button::B, 650, 6);"
+        clear_rival_dialogue = "clearRivalStarterDialogueBeforeCheck();"
         open_summary = "openStarterSummaryForCheck();"
 
         self.assertNotIn("tap(Button::A, 700, 8);", body)
         self.assertNotIn("tap(Button::A, 700, 16);", body)
         self.assertIn(receive_text, body)
         self.assertIn(decline_nickname, body)
+        self.assertIn(clear_rival_dialogue, body)
         self.assertIn(open_summary, body)
         self.assertLess(body.index(receive_text), body.index(decline_nickname))
-        self.assertLess(body.index(decline_nickname), body.index(open_summary))
+        self.assertLess(body.index(decline_nickname), body.index(clear_rival_dialogue))
+        self.assertLess(body.index(clear_rival_dialogue), body.index(open_summary))
+
+    def test_rival_dialogue_clear_uses_cancel_safe_inputs_before_menu(self):
+        match = re.search(r"void clearRivalStarterDialogueBeforeCheck\(\) \{(?P<body>.*?)\n\}", self.sketch, re.S)
+        self.assertIsNotNone(match)
+
+        body = match.group("body")
+        self.assertIn("tap(Button::B, 700, 8);", body)
+        self.assertIn("waitInterruptible(800);", body)
 
     def test_summary_check_opens_menu_and_first_pokemon_summary(self):
         match = re.search(r"void openStarterSummaryForCheck\(\) \{(?P<body>.*?)\n\}", self.sketch, re.S)
