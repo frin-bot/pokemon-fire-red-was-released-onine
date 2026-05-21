@@ -198,10 +198,17 @@ void runStarterAttempt(String starter) {
   tap(Button::A, 1000);      // Confirm the starter choice when Yes is selected.
   tap(Button::A, 650, 2);    // Advance receive text without accepting nickname.
   tap(Button::B, 650, 6);    // Advance remaining text and decline nickname prompt.
-  tap(Button::A, 700, 16);   // Advance rival dialogue and battle intro.
+  openStarterSummaryForCheck();
 
-  // This pause leaves the battle/send-out frames stable for the capture script.
+  // This pause leaves the summary sprite stable for the capture script.
   waitInterruptible(3000);
+}
+
+void openStarterSummaryForCheck() {
+  tap(Button::PLUS, 1000);   // Open the in-game menu.
+  tap(Button::A, 900);       // Open Pokemon.
+  tap(Button::A, 900);       // Select the first party slot.
+  tap(Button::A, 1200);      // Open Summary.
 }
 
 void softResetToSave() {

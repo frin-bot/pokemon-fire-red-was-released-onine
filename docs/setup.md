@@ -84,7 +84,7 @@ The Micro sketch sends `pushButton(Button::B, 500, 5)` and repeated L+R reports 
 
 The sketch also initializes the Switch controller library before Arduino's USB attach step. Without that early initialization, Windows may show the Micro as `VID_0F0D&PID_0092` with only a serial interface and no gamepad HID interface.
 
-The starter attempt intentionally switches from `A` to repeated `B` presses before the nickname prompt. This avoids accepting the prompt and typing a nickname if timing runs slightly fast.
+The starter attempt intentionally switches from `A` to repeated `B` presses before the nickname prompt. This avoids accepting the prompt and typing a nickname if timing runs slightly fast. After the nickname prompt is declined, the Micro opens the in-game menu, enters the Pokemon party, opens the first Pokemon's summary, and leaves that summary sprite stable for the shiny check.
 
 If Arduino reports `multiple definition of pushButton`, `multiple definition of CustomHID`, or similar linker errors, the library is being compiled twice. Check the `arduino/micro_controller/` folder and remove any copied library folders/files such as `src/`, `examples/`, `library.properties`, `LICENSE`, or a library `README.md`. The Micro sketch folder should contain only `micro_controller.ino`; the library should live under the Arduino libraries folder, usually `Documents\Arduino\libraries\NintendoSwitchControlLibrary`.
 
@@ -159,9 +159,10 @@ When the frame is classified as `non_shiny`, the app records the attempt, sends 
 
 ## 9. Timing Adjustment
 
-The Micro sketch includes starter-selection and soft-reset timing constants inside these routines:
+The Micro sketch includes starter-selection, menu-check, and soft-reset timing constants inside these routines:
 
 - `runStarterAttempt`
+- `openStarterSummaryForCheck`
 - `softResetToSave`
 
 The first real hardware session should be supervised. Adjust delays until the Micro reliably reaches the same check frame every attempt.
