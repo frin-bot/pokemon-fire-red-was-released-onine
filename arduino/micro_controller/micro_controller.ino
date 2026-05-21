@@ -87,6 +87,17 @@ void handleCommand(String command) {
     return;
   }
 
+  if (command == "soft_reset" || command == "sr") {
+    stopRequested = false;
+    sendStatus("BUSY SOFT_RESET");
+    pressSoftResetCombo();
+    if (!stopRequested) {
+      waitInterruptible(5500);
+      sendStatus("READY_TITLE");
+    }
+    return;
+  }
+
   sendStatus("ERR UNKNOWN_COMMAND");
 }
 

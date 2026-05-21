@@ -4,9 +4,11 @@ import unittest
 
 
 class MicroControllerSequenceTests(unittest.TestCase):
+    def setUp(self):
+        self.sketch = Path("arduino/micro_controller/micro_controller.ino").read_text()
+
     def test_starter_attempt_declines_nickname_before_resuming_a_spam(self):
-        sketch = Path("arduino/micro_controller/micro_controller.ino").read_text()
-        match = re.search(r"void runStarterAttempt\(String starter\) \{(?P<body>.*?)\n\}", sketch, re.S)
+        match = re.search(r"void runStarterAttempt\(String starter\) \{(?P<body>.*?)\n\}", self.sketch, re.S)
         self.assertIsNotNone(match)
 
         body = match.group("body")
@@ -20,6 +22,22 @@ class MicroControllerSequenceTests(unittest.TestCase):
         self.assertIn(rival_dialogue, body)
         self.assertLess(body.index(receive_text), body.index(decline_nickname))
         self.assertLess(body.index(decline_nickname), body.index(rival_dialogue))
+
+    def test_soft_reset_command_only_presses_reset_combo(self):
+        self.assertIn('if (command == "soft_reset" || command == "sr")', self.sketch)
+
+        match = re.search(
+            r'if \(command == "soft_reset" \|\| command == "sr"\) \{(?P<body>.*?)\n  \}',
+            self.sketch,
+            re.S,
+        )
+        self.assertIsNotNone(match)
+
+        body = match.group("body")
+        self.assertIn('sendStatus("BUSY SOFT_RESET");', body)
+        self.assertIn("pressSoftResetCombo();", body)
+        self.assertIn('sendStatus("READY_TITLE");', body)
+        self.assertNotIn("softResetToSave();", body)
 
 
 if __name__ == "__main__":

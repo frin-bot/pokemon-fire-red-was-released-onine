@@ -75,6 +75,11 @@ Upload order:
 7. With the Micro USB plugged into the Switch dock, use the Nano Serial Monitor to send `PAIR`. The Micro should reply with `TAPPED L+R`. This sends repeated L+R reports, which is the cleanest registration test for the controller-order screen.
 8. After `PAIR`, send `A`, `B`, `HOME`, `PLUS`, `MINUS`, `UP`, `DOWN`, `LEFT`, or `RIGHT`. The Micro should reply with `TAPPED ...`, and the Switch should visibly react to the matching single input.
 
+Manual reset commands:
+
+- `SOFT_RESET` or `SR`: press the game soft-reset combo and stop at the title screen. The Micro replies with `READY_TITLE`.
+- `RESET`: press the soft-reset combo, then continue back into the saved game. The Micro replies with `READY_SAVE`.
+
 The Micro sketch sends `pushButton(Button::B, 500, 5)` and repeated L+R reports during `setup()` before it prints `READY`. This mirrors the library example pattern and gives the Switch early button reports so it can register the USB controller after the Micro is plugged in.
 
 The sketch also initializes the Switch controller library before Arduino's USB attach step. Without that early initialization, Windows may show the Micro as `VID_0F0D&PID_0092` with only a serial interface and no gamepad HID interface.
