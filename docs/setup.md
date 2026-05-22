@@ -152,7 +152,35 @@ Check:
 
 ## 8. Hardware Run
 
-After dry-run behavior looks correct:
+After dry-run behavior looks correct, close Arduino Serial Monitor and verify the Nano-to-Micro bridge from the Python CLI:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py controller-command --serial-port COM3 --command PING
+```
+
+Expected response:
+
+```text
+PONG
+```
+
+If `PING` does not return `PONG`, do not start the hunt loop yet. Check that the Nano is the `COM3` device, the Micro is powered by the Switch dock, Nano `D11` is wired to Micro `RX1`, Nano `D10` is wired to Micro `TX1`, both boards share `GND`, and the Micro sketch is uploaded.
+
+Then open **Controllers > Change Grip/Order** on the Switch and run:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py controller-command --serial-port COM3 --command PAIR
+```
+
+Expected response:
+
+```text
+TAPPED L+R
+```
+
+If `PAIR` returns `TAPPED L+R` but the Switch does not react, reconnect the Micro to the Switch dock, confirm Pro Controller Wired Communication is enabled, and retry the controller pairing screen.
+
+After `PING` and `PAIR` both work:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 2 --width 1920 --height 1080 --fps 30 --serial-port COM3

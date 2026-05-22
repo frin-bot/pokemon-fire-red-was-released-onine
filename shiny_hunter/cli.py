@@ -87,6 +87,12 @@ def _build_parser() -> argparse.ArgumentParser:
     capture_frame.add_argument("--warmup-frames", type=int, default=5)
     capture_frame.set_defaults(func=_cmd_capture_frame)
 
+    controller = subparsers.add_parser("controller-command", help="Send one raw command to the controller bridge.")
+    controller.add_argument("--serial-port", required=True)
+    controller.add_argument("--baud-rate", type=int, default=57600)
+    controller.add_argument("--command", required=True)
+    controller.set_defaults(func=_cmd_controller_command)
+
     run = subparsers.add_parser("run", help="Run the hunt loop with capture-card feedback.")
     run.add_argument("--calibration", required=True, type=Path)
     run.add_argument("--backend", choices=["any", "dshow", "msmf"], default="any")
@@ -170,6 +176,15 @@ def _cmd_capture_frame(args: argparse.Namespace) -> int:
         return 0
     finally:
         capture.release()
+
+
+def _cmd_controller_command(args: argparse.Namespace) -> int:
+    link = _serial_link_from_args(args)
+    try:
+        print(link.exchange_command(args.command))
+        return 0
+    finally:
+        link.close()
 
 
 def _cmd_run(args: argparse.Namespace) -> int:

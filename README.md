@@ -90,3 +90,9 @@ Dry-run the loop without serial hardware:
 ```powershell
 .\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 2 --width 1920 --height 1080 --fps 30 --dry-run --max-attempts 3
 ```
+
+Check the Arduino controller bridge:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py controller-command --serial-port COM3 --command PING
+```
