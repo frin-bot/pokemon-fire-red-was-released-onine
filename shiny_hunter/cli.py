@@ -90,6 +90,7 @@ def _build_parser() -> argparse.ArgumentParser:
     controller = subparsers.add_parser("controller-command", help="Send one raw command to the controller bridge.")
     controller.add_argument("--serial-port", required=True)
     controller.add_argument("--baud-rate", type=int, default=57600)
+    controller.add_argument("--serial-open-delay", type=float, default=3.0)
     controller.add_argument("--command", required=True)
     controller.set_defaults(func=_cmd_controller_command)
 
@@ -103,6 +104,7 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--run-dir", type=Path, default=Path("runs/current"))
     run.add_argument("--serial-port")
     run.add_argument("--baud-rate", type=int, default=57600)
+    run.add_argument("--serial-open-delay", type=float, default=3.0)
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--max-attempts", type=int)
     run.add_argument("--check-delay", type=float, default=8.0)
@@ -238,7 +240,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
 def _serial_link_from_args(args: argparse.Namespace) -> SerialControllerLink:
     if not args.serial_port:
         raise ValueError("--serial-port is required unless --dry-run is set")
-    return SerialControllerLink(args.serial_port, baud_rate=args.baud_rate)
+    return SerialControllerLink(args.serial_port, baud_rate=args.baud_rate, open_delay=args.serial_open_delay)
 
 
 def _capture_backend_api(cv2, backend: str) -> int:

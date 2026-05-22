@@ -158,6 +158,8 @@ After dry-run behavior looks correct, close Arduino Serial Monitor and verify th
 .\.venv\Scripts\python.exe scripts\shiny-hunt.py controller-command --serial-port COM3 --command PING
 ```
 
+The Python CLI waits 3 seconds after opening `COM3` because opening the port resets the Nano. This mirrors the natural delay you get when opening Arduino Serial Monitor before typing a command.
+
 Expected response:
 
 ```text

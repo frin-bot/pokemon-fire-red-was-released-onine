@@ -31,7 +31,14 @@ class DryRunControllerLink:
 
 
 class SerialControllerLink:
-    def __init__(self, port: str, baud_rate: int = 57600, timeout: float = 2.0, ack_timeout: float = 8.0):
+    def __init__(
+        self,
+        port: str,
+        baud_rate: int = 57600,
+        timeout: float = 2.0,
+        ack_timeout: float = 8.0,
+        open_delay: float = 3.0,
+    ):
         try:
             import serial
         except ImportError as exc:
@@ -39,6 +46,11 @@ class SerialControllerLink:
 
         self._serial = serial.Serial(port=port, baudrate=baud_rate, timeout=timeout)
         self._ack_timeout = ack_timeout
+        if open_delay > 0:
+            time.sleep(open_delay)
+        reset_input_buffer = getattr(self._serial, "reset_input_buffer", None)
+        if reset_input_buffer is not None:
+            reset_input_buffer()
 
     def send_start_attempt(self, starter: str) -> str:
         command = f"START {starter}"

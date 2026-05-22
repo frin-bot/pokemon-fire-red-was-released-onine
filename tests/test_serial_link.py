@@ -1,5 +1,8 @@
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
+from shiny_hunter import serial_link
 from shiny_hunter.serial_link import DryRunControllerLink, SerialControllerLink
 
 
@@ -9,6 +12,7 @@ class FakeSerial:
         self.writes = []
         self.flushed = False
         self.closed = False
+        self.input_reset = False
 
     def write(self, data):
         self.writes.append(data)
@@ -20,6 +24,9 @@ class FakeSerial:
         if self.responses:
             return self.responses.pop(0)
         return b""
+
+    def reset_input_buffer(self):
+        self.input_reset = True
 
     def close(self):
         self.closed = True
@@ -40,6 +47,19 @@ class DryRunControllerLinkTests(unittest.TestCase):
 
 
 class SerialControllerLinkTests(unittest.TestCase):
+    def test_constructor_waits_after_opening_serial_port(self):
+        fake_serial = FakeSerial([])
+        fake_module = SimpleNamespace(Serial=lambda **_kwargs: fake_serial)
+
+        with patch.dict("sys.modules", {"serial": fake_module}):
+            with patch.object(serial_link.time, "sleep") as sleep:
+                link = SerialControllerLink("COM3", open_delay=3.0)
+
+        sleep.assert_called_once_with(3.0)
+        self.assertTrue(fake_serial.input_reset)
+        link.close()
+        self.assertTrue(fake_serial.closed)
+
     def test_start_attempt_waits_for_busy_acknowledgement(self):
         link = SerialControllerLink.__new__(SerialControllerLink)
         link._serial = FakeSerial([b"READY\n", b"BUSY START\n"])

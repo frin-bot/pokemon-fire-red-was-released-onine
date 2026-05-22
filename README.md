@@ -96,3 +96,5 @@ Check the Arduino controller bridge:
 ```powershell
 .\.venv\Scripts\python.exe scripts\shiny-hunt.py controller-command --serial-port COM3 --command PING
 ```
+
+The CLI waits briefly after opening the Nano serial port because opening `COM3` resets the Nano.
