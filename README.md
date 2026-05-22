@@ -68,15 +68,15 @@ List capture devices:
 Save a calibration frame from the capture card:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\shiny-hunt.py capture-frame --backend any --camera-index 1 --output calibration\starter-normal.png
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py capture-frame --backend any --camera-index 2 --width 1920 --height 1080 --fps 30 --output calibration\starter-normal.png
 ```
 
-Replace `1` with the capture-card index reported by `list-cameras`.
+Replace `2` with the capture-card or OBS Virtual Camera index reported by `list-cameras`.
 
 Create a calibration from a saved normal-starter screenshot:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image calibration\starter-normal.png --crop 100,100,80,80 --output calibration\charmander.json
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py calibrate-image --starter charmander --normal-image calibration\starter-normal.png --crop 444,282,258,284 --output calibration\charmander.json
 ```
 
 Classify a screenshot:
@@ -88,5 +88,5 @@ Classify a screenshot:
 Dry-run the loop without serial hardware:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 1 --dry-run --max-attempts 3
+.\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 2 --width 1920 --height 1080 --fps 30 --dry-run --max-attempts 3
 ```

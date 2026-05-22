@@ -80,6 +80,9 @@ def _build_parser() -> argparse.ArgumentParser:
     capture_frame = subparsers.add_parser("capture-frame", help="Save one frame from a capture device.")
     capture_frame.add_argument("--backend", choices=["any", "dshow", "msmf"], default="any")
     capture_frame.add_argument("--camera-index", type=int, default=0)
+    capture_frame.add_argument("--width", type=int)
+    capture_frame.add_argument("--height", type=int)
+    capture_frame.add_argument("--fps", type=float)
     capture_frame.add_argument("--output", required=True, type=Path)
     capture_frame.add_argument("--warmup-frames", type=int, default=5)
     capture_frame.set_defaults(func=_cmd_capture_frame)
@@ -88,6 +91,9 @@ def _build_parser() -> argparse.ArgumentParser:
     run.add_argument("--calibration", required=True, type=Path)
     run.add_argument("--backend", choices=["any", "dshow", "msmf"], default="any")
     run.add_argument("--camera-index", type=int, default=0)
+    run.add_argument("--width", type=int)
+    run.add_argument("--height", type=int)
+    run.add_argument("--fps", type=float)
     run.add_argument("--run-dir", type=Path, default=Path("runs/current"))
     run.add_argument("--serial-port")
     run.add_argument("--baud-rate", type=int, default=57600)
@@ -150,7 +156,7 @@ def _cmd_list_cameras(args: argparse.Namespace) -> int:
 
 def _cmd_capture_frame(args: argparse.Namespace) -> int:
     cv2 = _import_cv2()
-    capture = cv2.VideoCapture(args.camera_index, _capture_backend_api(cv2, args.backend))
+    capture = _open_video_capture(cv2, args)
 
     if not capture.isOpened():
         raise RuntimeError(f"could not open camera index {args.camera_index}")
@@ -171,7 +177,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     calibration = load_calibration(args.calibration)
     logger = RunLogger(args.run_dir, starter=calibration.starter)
     link = DryRunControllerLink() if args.dry_run else _serial_link_from_args(args)
-    capture = cv2.VideoCapture(args.camera_index, _capture_backend_api(cv2, args.backend))
+    capture = _open_video_capture(cv2, args)
 
     if not capture.isOpened():
         raise RuntimeError(f"could not open camera index {args.camera_index}")
@@ -226,6 +232,17 @@ def _capture_backend_api(cv2, backend: str) -> int:
         "dshow": cv2.CAP_DSHOW,
         "msmf": cv2.CAP_MSMF,
     }[backend]
+
+
+def _open_video_capture(cv2, args: argparse.Namespace):
+    capture = cv2.VideoCapture(args.camera_index, _capture_backend_api(cv2, args.backend))
+    if args.width is not None:
+        capture.set(cv2.CAP_PROP_FRAME_WIDTH, args.width)
+    if args.height is not None:
+        capture.set(cv2.CAP_PROP_FRAME_HEIGHT, args.height)
+    if args.fps is not None:
+        capture.set(cv2.CAP_PROP_FPS, args.fps)
+    return capture
 
 
 def _read_capture_frame(capture, warmup_frames: int):
