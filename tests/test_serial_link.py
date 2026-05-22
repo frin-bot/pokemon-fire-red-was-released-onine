@@ -62,12 +62,13 @@ class SerialControllerLinkTests(unittest.TestCase):
 
     def test_start_attempt_waits_for_busy_acknowledgement(self):
         link = SerialControllerLink.__new__(SerialControllerLink)
-        link._serial = FakeSerial([b"READY\n", b"BUSY START\n"])
+        link._serial = FakeSerial([b"READY\n", b"BUSY START\n", b"READY_CHECK\n"])
         link._ack_timeout = 0.1
+        link._action_timeout = 0.1
 
         ack = link.send_start_attempt("charmander")
 
-        self.assertEqual(ack, "BUSY START")
+        self.assertEqual(ack, "READY_CHECK")
         self.assertEqual(link._serial.writes, [b"START charmander\n"])
         self.assertTrue(link._serial.flushed)
 
@@ -79,10 +80,31 @@ class SerialControllerLinkTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "did not acknowledge START charmander"):
             link.send_start_attempt("charmander")
 
+    def test_start_attempt_raises_when_summary_check_ready_never_arrives(self):
+        link = SerialControllerLink.__new__(SerialControllerLink)
+        link._serial = FakeSerial([b"BUSY START\n"])
+        link._ack_timeout = 0.1
+        link._action_timeout = 0.01
+
+        with self.assertRaisesRegex(RuntimeError, "did not acknowledge START charmander; expected READY_CHECK"):
+            link.send_start_attempt("charmander")
+
+    def test_reset_waits_until_save_is_loaded(self):
+        link = SerialControllerLink.__new__(SerialControllerLink)
+        link._serial = FakeSerial([b"BUSY RESET\n", b"READY_SAVE\n"])
+        link._ack_timeout = 0.1
+        link._action_timeout = 0.1
+
+        ack = link.send_reset()
+
+        self.assertEqual(ack, "READY_SAVE")
+        self.assertEqual(link._serial.writes, [b"RESET\n"])
+
     def test_raw_command_returns_first_response(self):
         link = SerialControllerLink.__new__(SerialControllerLink)
         link._serial = FakeSerial([b"PONG\n"])
         link._ack_timeout = 0.1
+        link._action_timeout = 0.1
 
         self.assertEqual(link.exchange_command("PING"), "PONG")
         self.assertEqual(link._serial.writes, [b"PING\n"])

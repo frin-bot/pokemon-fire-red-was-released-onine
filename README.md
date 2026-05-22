@@ -98,3 +98,4 @@ Check the Arduino controller bridge:
 ```
 
 The CLI waits briefly after opening the Nano serial port because opening `COM3` resets the Nano.
+Hardware runs also wait for the Micro to report `READY_CHECK` before classifying the capture frame.

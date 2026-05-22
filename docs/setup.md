@@ -188,6 +188,8 @@ After `PING` and `PAIR` both work:
 .\.venv\Scripts\python.exe scripts\shiny-hunt.py run --calibration calibration\charmander.json --backend any --camera-index 2 --width 1920 --height 1080 --fps 30 --serial-port COM3
 ```
 
+During a hardware run, Python sends `START charmander` and waits until the Micro replies with `READY_CHECK`. That means the script should not classify the video frame until after the Micro has selected the starter, declined the nickname prompt, cleared rival dialogue, and opened the Pokemon summary screen.
+
 Replace `COM3` with the Nano's Windows COM port.
 
 The app stops when:

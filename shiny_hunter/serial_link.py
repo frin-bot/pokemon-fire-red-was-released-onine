@@ -37,6 +37,7 @@ class SerialControllerLink:
         baud_rate: int = 57600,
         timeout: float = 2.0,
         ack_timeout: float = 8.0,
+        action_timeout: float = 90.0,
         open_delay: float = 3.0,
     ):
         try:
@@ -46,6 +47,7 @@ class SerialControllerLink:
 
         self._serial = serial.Serial(port=port, baudrate=baud_rate, timeout=timeout)
         self._ack_timeout = ack_timeout
+        self._action_timeout = action_timeout
         if open_delay > 0:
             time.sleep(open_delay)
         reset_input_buffer = getattr(self._serial, "reset_input_buffer", None)
@@ -55,20 +57,22 @@ class SerialControllerLink:
     def send_start_attempt(self, starter: str) -> str:
         command = f"START {starter}"
         self._send_line(command)
-        return self._read_until(command, ("BUSY START",))
+        self._read_until(command, ("BUSY START",), timeout=self._ack_timeout)
+        return self._read_until(command, ("READY_CHECK",), timeout=self._action_timeout)
 
     def send_reset(self) -> str:
         self._send_line("RESET")
-        return self._read_until("RESET", ("BUSY RESET",))
+        self._read_until("RESET", ("BUSY RESET",), timeout=self._ack_timeout)
+        return self._read_until("RESET", ("READY_SAVE",), timeout=self._action_timeout)
 
     def send_stop(self, reason: str) -> str:
         command = f"STOP {reason}"
         self._send_line(command)
-        return self._read_until(command, ("STOPPED",))
+        return self._read_until(command, ("STOPPED",), timeout=self._ack_timeout)
 
     def exchange_command(self, command: str) -> str:
         self._send_line(command)
-        return self._read_until(command, ())
+        return self._read_until(command, (), timeout=self._ack_timeout)
 
     def close(self) -> None:
         self._serial.close()
@@ -77,8 +81,8 @@ class SerialControllerLink:
         self._serial.write((line.strip() + "\n").encode("ascii"))
         self._serial.flush()
 
-    def _read_until(self, command: str, expected_prefixes: tuple[str, ...]) -> str:
-        deadline = time.monotonic() + self._ack_timeout
+    def _read_until(self, command: str, expected_prefixes: tuple[str, ...], timeout: float) -> str:
+        deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
             raw_line = self._serial.readline()
             if not raw_line:
